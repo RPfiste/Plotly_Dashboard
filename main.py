@@ -21,9 +21,15 @@ print(df.head())
 #entferne der Zeilen, die "Region" oder "ganzer Kanton" beinhalten
 df_gemeinde = df[df['GEBIET_NAME'].str.contains('Region') == False]                             #definiert als df_gemeinde alle daten die nicht "Region" beinhalten
 df_gemeinde = df_gemeinde[df_gemeinde['GEBIET_NAME'].str.contains('ganzer Kanton') == False]    #definiert als df_gemeinde alle daten die nicht "ganzer Kanton" beinhalten
+df_gemeinde = df_gemeinde[df_gemeinde['GEBIET_NAME'].str.contains('Bezirk') == False]           #definiert als df_gemeinde alle daten die nicht "Bezirk" beinhalten
 
-#Erstellen eines Histogramms
-fig = px.histogram(df_gemeinde, x="INDIKATOR_VALUE", nbins=100)
+
+#nach GEBIETS_NAME gruppieren
+df_gemeinde= df_gemeinde.groupby('GEBIET_NAME').mean()
+print(df_gemeinde.head())
+
+#Plot erstellen
+fig = px.bar(df_gemeinde, y='INDIKATOR_VALUE', barmode='group')
 
 #Layout anpassen
 fig.update_layout(
@@ -31,6 +37,9 @@ fig.update_layout(
     paper_bgcolor=colors['background'],
     font_color=colors['text']
 )
+
+#Spalteninhalt zuweisen
+
 
 
 #Erstellen der Beschriftung des Dashboards
@@ -40,13 +49,20 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         style={
             'textAlign': 'center',                                                      #Zentriert darstellen
             'color': colors['text']                                                     #Textfarbe bestimmen
-        }
-    ),
-    html.Div(children='Anzahl Arbeitsstätten im Primärsektor nach Gemeinden.', style={  #Plotbeschritung erstellen
-        'textAlign': 'center',                                                          #Beschriftung zentrieren
-        'color': colors['text']                                                         #Textfarbe bestimmen
     }),
+    html.Div(children='Durchschnittliche Anzahl Arbeitsstätten im Primärsektor nach Gemeinden.',
+        style={                                                                         #Plotbeschritung erstellen
+            'textAlign': 'center',                                                          #Beschriftung zentrieren
+            'color': colors['text']                                                         #Textfarbe bestimmen
+    }),
+    html.Div(children=[
+            html.Label('Dropdown'),
+            dcc.Dropdown(['GEBIET_NAME']),
 
+
+
+
+        ], ),
     dcc.Graph(
         id='example-graph',
         figure=fig
