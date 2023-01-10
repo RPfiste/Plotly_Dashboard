@@ -27,6 +27,7 @@ df_gemeinde = df_bezirk[df_bezirk['GEBIET_NAME'].str.contains('Bezirk') == False
 print(df_gemeinde.head())
 
 #nach GEBIETS_NAME gruppieren
+df_gemeinde_group= df_gemeinde.groupby('GEBIET_NAME')
 df_gemeinde_mean= df_gemeinde.groupby('GEBIET_NAME').mean()
 print(df_gemeinde_mean.head())
 
@@ -60,17 +61,19 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         style={
             'color' : colors['text']
         }),
-            dcc.Dropdown(df_gemeinde['GEBIET_NAME']),
+        html.Div([
+            dcc.Dropdown(
+                df_gemeinde_group['GEBIET_NAME'].unique(),
+                id='xaxis-column'
+            )
+        ],  style={'width': '48%', 'display': 'inline-block'})
+    ])
 
+dcc.Graph(
+    id='mean_plot',
+    figure=plot_gemeinde_mean
+)
 
-
-
-
-    dcc.Graph(
-        id='example-graph',
-        figure=plot_gemeinde_mean
-    )
-])
 
 #In Browser darstellen
 if __name__ == '__main__':
